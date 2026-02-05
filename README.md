@@ -29,7 +29,7 @@ graph LR
     D[📜 Ansible<br>deploy.yml] -->|Orchestration| C
     C -->|Service NodePort| E[🌍 Navigateur Web]
 
-    ## 🚀 Démarrage Rapide (Automatisation)
+## 🚀 Démarrage Rapide (Automatisation)
 
 Pour simplifier l'évaluation et l'utilisation, un fichier `Makefile` a été mis en place. Il permet de lancer l'intégralité du projet en **une seule commande**.
 
