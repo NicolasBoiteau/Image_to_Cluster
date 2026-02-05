@@ -28,13 +28,80 @@ graph LR
     B -->|Import| C{☸️ Cluster K3d<br>Server + 2 Agents}
     D[📜 Ansible<br>deploy.yml] -->|Orchestration| C
     C -->|Service NodePort| E[🌍 Navigateur Web]
+Les outils utilisés :
+Packer (HashiCorp) : Utilisé pour créer une "Golden Image". Contrairement à un simple docker build, Packer permet de standardiser la création d'artefacts. Ici, il génère une image Docker contenant notre page HTML.
 
-## 🚀 Démarrage Rapide (Automatisation)
+K3d (K3s in Docker) : Une distribution Kubernetes légère qui tourne dans des conteneurs Docker. Elle simule un cluster réel avec 1 Maître et 2 Agents.
 
-Pour simplifier l'évaluation et l'utilisation, un fichier `Makefile` a été mis en place. Il permet de lancer l'intégralité du projet en **une seule commande**.
+Ansible : Outil de gestion de configuration. Il dialogue avec l'API Kubernetes pour déployer nos objets (Deployments, Services) de manière idempotente.
 
-### Installation et Lancement
-Ouvrez un terminal et exécutez :
+Makefile : Le chef d'orchestre qui automatise l'enchaînement des commandes.
 
-```bash
+🚀 Démarrage Rapide (Automatisation)
+Pour répondre aux exigences d'automatisation maximale ("One-Button Deployment"), un fichier Makefile pilote l'ensemble du projet.
+
+Prérequis
+Être dans l'environnement GitHub Codespaces du projet.
+
+Lancement en une commande
+Ouvrez un terminal et exécutez simplement :
+
+Bash
 make all
+Que fait cette commande ? Elle exécute séquentiellement toutes les étapes sans intervention humaine :
+
+✅ Install : Installe les dépendances (Packer, Ansible, librairies Python).
+
+✅ Cluster : Initialise le cluster K3d lab.
+
+✅ Build : Lance Packer pour créer l'image et l'importe dans le registre interne de K3d.
+
+✅ Deploy : Lance le playbook Ansible pour déployer l'application.
+
+🔍 Détails des étapes (Pour comprendre)
+Si vous souhaitez exécuter les étapes manuellement pour analyser le processus :
+
+Étape 1 : Construction de l'image (Packer)
+Packer démarre un conteneur temporaire, y copie le fichier index.html, et sauvegarde le résultat sous le tag mon-nginx-custom:v1.
+
+Bash
+packer init template.pkr.hcl
+packer build template.pkr.hcl
+Étape 2 : Import dans Kubernetes
+K3d tourne dans des conteneurs isolés. Il ne voit pas les images Docker de l'hôte par défaut. Nous devons injecter l'image manuellement :
+
+Bash
+k3d image import mon-nginx-custom:v1 -c lab
+Étape 3 : Déploiement (Ansible)
+Ansible applique les manifestes définis dans deploy.yml.
+
+Deployment : Assure qu'une réplique du pod tourne en permanence.
+
+Service (NodePort) : Ouvre un port pour rendre l'application accessible.
+
+Bash
+ansible-playbook deploy.yml
+🌐 Vérification et Accès
+Une fois le déploiement terminé (via make all), l'application tourne sur le port 30080 à l'intérieur du cluster. Pour y accéder depuis le navigateur de Codespaces :
+
+Lancez la commande de redirection :
+
+Bash
+kubectl port-forward svc/nginx-service 8081:80
+Une notification apparaît en bas à droite ("Open in Browser").
+
+Vous devriez voir la page de succès "MISSION RÉUSSIE".
+
+📂 Structure du Répertoire
+Plaintext
+.
+├── Makefile            # 🤖 Script d'automatisation (Le "Bouton magique")
+├── README.md           # 📘 Documentation du projet
+├── deploy.yml          # ⚙️ Playbook Ansible (Déploiement K8s)
+├── index.html          # 📄 Site web statique personnalisé
+└── template.pkr.hcl    # 📦 Configuration Packer (Image builder)
+🧹 Nettoyage
+Pour supprimer le cluster et nettoyer l'environnement :
+
+Bash
+make clean
