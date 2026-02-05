@@ -29,19 +29,10 @@ Le projet suit un pipeline DevOps strict, illustré ci-dessous :
 
 ```mermaid
 graph LR
-    A[📄 Code source<br/>index.html]
-    -->|Packer|
-    B[📦 Image Docker<br/>mon-nginx-custom:v1]
-
-    B -->|Import|
-    C[☸️ Cluster K3d<br/>1 Server + 2 Agents]
-
-    D[📜 Ansible<br/>deploy.yml]
-    -->|Orchestration|
-    C
-
-    C -->|Service NodePort|
-    E[🌍 Navigateur Web]
+    A[Code source<br/>index.html] -->|Packer| B[Image Docker<br/>mon-nginx-custom:v1]
+    B -->|Import| C[Cluster K3d<br/>1 Server + 2 Agents]
+    D[Ansible<br/>deploy.yml] -->|Orchestration| C
+    C -->|Service NodePort| E[Navigateur Web]
 ```
 
 ---
