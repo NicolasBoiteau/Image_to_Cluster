@@ -1,0 +1,46 @@
+- name: Deploiement sur K3d
+  hosts: localhost
+  connection: local
+  gather_facts: no
+  tasks:
+    - name: Créer le Deployment Nginx
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: apps/v1
+          kind: Deployment
+          metadata:
+            name: mario-nginx
+            namespace: default
+          spec:
+            replicas: 1
+            selector:
+              matchLabels:
+                app: custom-nginx
+            template:
+              metadata:
+                labels:
+                  app: custom-nginx
+              spec:
+                containers:
+                - name: nginx
+                  image: mon-nginx-custom:v1
+                  imagePullPolicy: Never # Important pour K3d local
+                  ports:
+                  - containerPort: 80
+
+    - name: Créer le Service (Exposition)
+      kubernetes.core.k8s:
+        definition:
+          apiVersion: v1
+          kind: Service
+          metadata:
+            name: nginx-service
+            namespace: default
+          spec:
+            type: NodePort
+            selector:
+              app: custom-nginx
+            ports:
+            - port: 80
+              targetPort: 80
+              nodePort: 30080
