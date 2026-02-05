@@ -27,7 +27,8 @@ graph LR
     A[📄 Code Source<br>index.html] -->|Packer| B(📦 Image Docker<br>mon-nginx-custom:v1)
     B -->|Import| C{☸️ Cluster K3d<br>Server + 2 Agents}
     D[📜 Ansible<br>deploy.yml] -->|Orchestration| C
-    C -->|Service NodePort| E[🌍 Navigateur Web]
+    C -->|Service NodePort| E[🌍 Navigateur Web]```
+    
 Les outils utilisés :
 Packer (HashiCorp) : Utilisé pour créer une "Golden Image". Contrairement à un simple docker build, Packer permet de standardiser la création d'artefacts. Ici, il génère une image Docker contenant notre page HTML.
 
