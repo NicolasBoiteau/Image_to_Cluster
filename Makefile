@@ -11,9 +11,15 @@ install:
 	@echo "🛠️  Installation des outils..."
 	# On vire le fichier qui bloque les mises à jour (Yarn)
 	sudo rm -f /etc/apt/sources.list.d/yarn.list
-	# Mise à jour des paquets
+	# On s'assure d'avoir curl et les outils de base
 	sudo apt-get update || true
-	# Installation de Packer, Ansible et la lib Python Kubernetes
+	sudo apt-get install -y curl software-properties-common
+	# AJOUT DU DÉPÔT HASHICORP (POUR PACKER)
+	curl -fsSL https://apt.releases.hashicorp.com/gpg | sudo apt-key add -
+	sudo apt-add-repository "deb [arch=amd64] https://apt.releases.hashicorp.com $$(lsb_release -cs) main" -y
+	# Mise à jour après ajout du dépôt
+	sudo apt-get update || true
+	# Installation finale
 	sudo apt-get install packer ansible python3-kubernetes -y
 	# Installation du module Ansible pour K8s
 	ansible-galaxy collection install kubernetes.core
